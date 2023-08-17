@@ -1,0 +1,8 @@
+.github
+lib
+.editorconfig
+.gitignore
+.swcrc
+pnpm-lock.yaml
+tsconfig.json
+.npmignore

@@ -1,0 +1,54 @@
+name: Publish to NPM and Create Release
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js 18.17.0
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18.17.0'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Install pnpm
+      run: curl -f https://get.pnpm.io/v6.js | node - add --global pnpm
+
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Build
+      run: pnpm build
+
+    - name: Generate Changelog and Bump Version
+      run: npx standard-version
+
+    - name: Get version
+      run: echo "VERSION=$(jq -r '.version' package.json)" >> $GITHUB_ENV
+
+    - name: Publish to NPM
+      run: pnpm publish --access public --no-git-checks
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+
+    - name: Create Tag
+      run: |
+        git tag v${{ env.VERSION }}
+        git push origin v${{ env.VERSION }}
+
+    - name: Set Release Description
+      run: echo "RELEASE_BODY=$(sed -n '/^## \[v'${{ env.VERSION }}'\]/,/^## \[v[0-9.]+\]/p' CHANGELOG.md)" >> $GITHUB_ENV
+
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      with:
+        tag_name: v${{ env.VERSION }}
+        release_name: Release v${{ env.VERSION }}
+        body: ${{ env.RELEASE_BODY }}
+        draft: false
+        prerelease: false
