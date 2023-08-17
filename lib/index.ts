@@ -40,7 +40,7 @@ interface ConfigOptions {
 const { PayloadTooLargeError } = utils.errors;
 const { kbytesToBytes, bytesToHumanReadable } = utils.file;
 
-export default {
+export = {
   init(config: ConfigOptions) {
     const {SecretId, SecretKey,Bucket, Region, ACL = 'default', Expires = 3600} = config
     const COSInitConfig = {
@@ -135,5 +135,5 @@ export default {
         )
       })
     }
-  },
+  }
 };
