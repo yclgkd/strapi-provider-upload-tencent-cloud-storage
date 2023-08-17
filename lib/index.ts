@@ -40,6 +40,14 @@ interface ConfigOptions {
 const { PayloadTooLargeError } = utils.errors;
 const { kbytesToBytes, bytesToHumanReadable } = utils.file;
 
+const log = (...args: any) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.debug('>>>>>>> upload cos <<<<<<<');
+    console.debug(...args);
+  }
+};
+
+
 export = {
   init(config: ConfigOptions) {
     const {SecretId, SecretKey, Bucket, Region, ACL = 'default', Expires = 3600} = config
@@ -68,6 +76,7 @@ export = {
               Key
             },
             function (err) {
+              log({err})
               if (err) return reject(err)
               resolve()
             }
@@ -99,6 +108,7 @@ export = {
             Protocol: 'https'
           },
           function (err, data) {
+            log({err, data})
             if (err) return reject(err)
             resolve({url: data.Url})
           }
@@ -130,6 +140,7 @@ export = {
             ContentType: file.mime,
           },
           function (err, data) {
+            log({err, data})
             if (err) return reject(err)
             file.url = `https://${data.Location}`
             file.provider = 'strapi-provider-upload-tencent-cloud-storage'
