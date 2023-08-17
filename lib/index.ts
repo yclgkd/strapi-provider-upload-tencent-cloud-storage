@@ -140,7 +140,7 @@ export = {
             ContentType: file.mime,
           },
           function (err, data) {
-            log({err, data})
+            log({err, data, size: file.size})
             if (err) return reject(err)
             file.url = `https://${data.Location}`
             file.provider = 'strapi-provider-upload-tencent-cloud-storage'
