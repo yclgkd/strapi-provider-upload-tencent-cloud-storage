@@ -14,7 +14,7 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: '18.17.0'
-        registry-url: 'https://registry.npmjs.org'
+        registry-url: https://registry.npmjs.org
 
     - name: Install pnpm
       run: curl -f https://get.pnpm.io/v6.js | node - add --global pnpm
@@ -24,6 +24,11 @@ jobs:
 
     - name: Build
       run: pnpm build
+
+    - name: Configure Git User
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
 
     - name: Generate Changelog and Bump Version
       run: npx standard-version
@@ -35,11 +40,6 @@ jobs:
       run: pnpm publish --access public --no-git-checks
       env:
         NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
-
-    - name: Create Tag
-      run: |
-        git tag v${{ env.VERSION }}
-        git push origin v${{ env.VERSION }}
 
     - name: Set Release Description
       run: echo "RELEASE_BODY=$(sed -n '/^## \[v'${{ env.VERSION }}'\]/,/^## \[v[0-9.]+\]/p' CHANGELOG.md)" >> $GITHUB_ENV
