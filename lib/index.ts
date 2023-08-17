@@ -42,7 +42,7 @@ const { kbytesToBytes, bytesToHumanReadable } = utils.file;
 
 export = {
   init(config: ConfigOptions) {
-    const {SecretId, SecretKey,Bucket, Region, ACL = 'default', Expires = 3600} = config
+    const {SecretId, SecretKey, Bucket, Region, ACL = 'default', Expires = 3600} = config
     const COSInitConfig = {
       SecretId,
       SecretKey,
@@ -129,7 +129,7 @@ export = {
           function (err, data) {
             if (err) return reject(err)
             file.url = `https://${data.Location}`
-            file.provider = 'COS'
+            file.provider = 'strapi-provider-upload-tencent-cloud-storage'
             resolve()
           }
         )
