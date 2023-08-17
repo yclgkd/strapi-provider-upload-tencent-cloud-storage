@@ -64,7 +64,7 @@ export = {
     return {
       upload,
 
-      uploadStream: upload,
+      // uploadStream: upload,
 
       delete(file: File): Promise<void> {
         const Key = getFileKey(file)
@@ -136,8 +136,6 @@ export = {
             Region,
             Key,
             Body: file.stream || file.buffer,
-            ContentLength: kbytesToBytes(file.size),
-            ContentType: file.mime,
           },
           function (err, data) {
             log({err, data, size: file.size})

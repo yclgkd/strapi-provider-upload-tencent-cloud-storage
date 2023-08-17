@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-upload-tencent-cloud-storage",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A integration of Tencent Cloud COS as a file storage solution within Strapi.",
   "main": "dist/index.js",
   "directories": {
