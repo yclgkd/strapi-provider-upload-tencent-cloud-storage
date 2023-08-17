@@ -54,6 +54,8 @@ export = {
     const cos = new COS(COSInitConfig);
 
     return {
+      upload,
+
       uploadStream: upload,
 
       delete(file: File): Promise<void> {
@@ -114,6 +116,7 @@ export = {
     }
 
     function upload(file: File): Promise<void> {
+      if (!file.stream && !file.buffer) return Promise.reject(new Error('Missing Readable Stream or Buffer'));
       const Key = getFileKey(file)
       return new Promise((resolve, reject) => {
         cos.putObject(
@@ -122,7 +125,7 @@ export = {
             Bucket,
             Region,
             Key,
-            Body: file.stream,
+            Body: file.stream || file.buffer,
             ContentLength: kbytesToBytes(file.size),
             ContentType: file.mime,
           },
