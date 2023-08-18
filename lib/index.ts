@@ -50,7 +50,7 @@ const log = (...args: any) => {
 
 export = {
   init(config: ConfigOptions) {
-    const {SecretId, SecretKey, Bucket, Region, ACL = 'default', Expires = 3600} = config
+    const {SecretId, SecretKey, Bucket, Region, ACL = 'default', Expires = 360} = config
     const COSInitConfig = {
       SecretId,
       SecretKey,

@@ -1,13 +1,17 @@
 {
   "name": "strapi-provider-upload-tencent-cloud-storage",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A integration of Tencent Cloud COS as a file storage solution within Strapi.",
   "main": "dist/index.js",
   "directories": {
     "lib": "./lib"
   },
   "scripts": {
-    "build": "tsc"
+    "cz": "cz",
+    "format": "prettier --write --ignore-unknown",
+    "build": "tsc",
+    "prepare": "husky install",
+    "preinstall": "npx only-allow pnpm -y"
   },
   "repository": {
     "type": "git",
@@ -19,16 +23,27 @@
     "tencent-cos",
     "cos",
     "strapi-provider",
+    "strapi-provider-upload",
     "object-storage"
   ],
-  "author": "Brian Yao",
+  "author": {
+    "name": "Brian Yao",
+    "email": "me@brianyao.tech"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/yclgkd/strapi-provider-upload-tencent-cloud-storage/issues"
   },
   "homepage": "https://github.com/yclgkd/strapi-provider-upload-tencent-cloud-storage#readme",
   "devDependencies": {
+    "@commitlint/cli": "^17.7.0",
+    "@commitlint/config-conventional": "^17.7.0",
     "@types/node": "^20.5.0",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.0",
+    "prettier": "3.0.2",
     "typescript": "^5.1.6"
   },
   "dependencies": {
@@ -45,5 +60,13 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "lint-staged": {
+    "**/*": "prettier --write --ignore-unknown"
   }
 }
