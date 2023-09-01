@@ -1,7 +1,7 @@
-import type {ReadStream} from 'node:fs';
-import COS from 'cos-nodejs-sdk-v5';
-import type {COSOptions, PutObjectParams} from 'cos-nodejs-sdk-v5'
-import * as utils from '@strapi/utils';
+import type { ReadStream } from "node:fs";
+import COS from "cos-nodejs-sdk-v5";
+import type { COSOptions, PutObjectParams } from "cos-nodejs-sdk-v5";
+import * as utils from "@strapi/utils";
 
 interface File {
   name: string;
@@ -30,34 +30,57 @@ interface ConfigOptions {
   initOptions?: COSOptions;
   Bucket: string;
   Region: string;
-  uploadOptions?: Exclude<PutObjectParams, 'Bucket' | 'Region' | 'Key' | 'Body' | 'ContentLength' | 'ContentType'>
+  uploadOptions?: Exclude<
+    PutObjectParams,
+    "Bucket" | "Region" | "Key" | "Body" | "ContentLength" | "ContentType"
+  >;
   // access control list for the bucket
-  ACL?: 'private' | 'default';
+  ACL?: "private" | "default";
   // the expiration time of the signature file(millisecond)
   Expires?: number;
+  CDNDomain?: string;
+  StorageRootPath?: string;
 }
 
 const { PayloadTooLargeError } = utils.errors;
 const { kbytesToBytes, bytesToHumanReadable } = utils.file;
 
 const log = (...args: any) => {
-  if (process.env.NODE_ENV !== 'production') {
-    console.debug('>>>>>>> upload cos <<<<<<<');
+  if (process.env.NODE_ENV !== "production") {
+    console.debug(">>>>>>> upload cos <<<<<<<");
     console.debug(...args);
   }
 };
 
-
 export = {
   init(config: ConfigOptions) {
-    const {SecretId, SecretKey, Bucket, Region, ACL = 'default', Expires = 360} = config
+    const {
+      SecretId,
+      SecretKey,
+      Bucket,
+      Region,
+      ACL = "default",
+      Expires = 360,
+      StorageRootPath,
+      CDNDomain,
+    } = config;
     const COSInitConfig = {
       SecretId,
       SecretKey,
-      ...config.initOptions
-    }
-    if((COSInitConfig.SecretId && COSInitConfig.SecretKey) || COSInitConfig.getAuthorization){}
-    else throw new Error('getAuthorization or SecretId and SecretKey must be provided')
+      ...config.initOptions,
+    };
+    if (
+      (COSInitConfig.SecretId && COSInitConfig.SecretKey) ||
+      COSInitConfig.getAuthorization
+    ) {
+    } else
+      throw new Error(
+        "getAuthorization or SecretId and SecretKey must be provided",
+      );
+
+    const filePrefix = StorageRootPath
+      ? `${StorageRootPath.replace(/\/+$/, "")}/`
+      : "";
     // init COS
     const cos = new COS(COSInitConfig);
 
@@ -67,67 +90,77 @@ export = {
       // uploadStream: upload,
 
       delete(file: File): Promise<void> {
-        const Key = getFileKey(file)
+        const Key = getFileKey(file);
         return new Promise((resolve, reject) => {
           cos.deleteObject(
             {
               Bucket,
               Region,
-              Key
+              Key,
             },
             function (err) {
-              log({err})
-              if (err) return reject(err)
-              resolve()
-            }
-          )
-        })
+              log({ err });
+              if (err) return reject(err);
+              resolve();
+            },
+          );
+        });
       },
 
-      checkFileSize(file: File, { sizeLimit}: {
-        sizeLimit?: number;
-      }) {
-        const maxSize = 5 * 1024 * 1024 * 1024
-        const limit = sizeLimit ? Math.min(sizeLimit, maxSize) : maxSize
+      checkFileSize(
+        file: File,
+        {
+          sizeLimit,
+        }: {
+          sizeLimit?: number;
+        },
+      ) {
+        const maxSize = 5 * 1024 * 1024 * 1024;
+        const limit = sizeLimit ? Math.min(sizeLimit, maxSize) : maxSize;
         if (kbytesToBytes(file.size) > limit) {
           throw new PayloadTooLargeError(
-            `${file.name} exceeds size limit of ${bytesToHumanReadable(limit)}.`
+            `${file.name} exceeds size limit of ${bytesToHumanReadable(
+              limit,
+            )}.`,
           );
         }
       },
 
-      getSignedUrl(file: File): Promise<{url: string}> {
-        const Key = getFileKey(file)
-        return new Promise((resolve, reject) => {cos.getObjectUrl(
-          {
-            Bucket,
-            Region,
-            Key,
-            Sign: true,
-            Expires,
-            Protocol: 'https'
-          },
-          function (err, data) {
-            log({err, data})
-            if (err) return reject(err)
-            resolve({url: data.Url})
-          }
-        )})
+      getSignedUrl(file: File): Promise<{ url: string }> {
+        const Key = getFileKey(file);
+        return new Promise((resolve, reject) => {
+          cos.getObjectUrl(
+            {
+              Bucket,
+              Region,
+              Key,
+              Sign: true,
+              Expires,
+              Protocol: "https",
+            },
+            function (err, data) {
+              log({ err, data });
+              if (err) return reject(err);
+              resolve({ url: data.Url });
+            },
+          );
+        });
       },
 
       isPrivate() {
-        return ACL === 'private';
+        return ACL === "private";
       },
     };
 
     function getFileKey(file: File): string {
-      const path = file.path ? `${file.path}/` : '';
-      return `${path}${file.hash}${file.ext}`;
+      const path = file.path ? `${file.path}/` : "";
+      return `${filePrefix}${path}${file.hash}${file.ext}`;
     }
 
     function upload(file: File): Promise<void> {
-      if (!file.stream && !file.buffer) return Promise.reject(new Error('Missing Readable Stream or Buffer'));
-      const Key = getFileKey(file)
+      if (!file.stream && !file.buffer)
+        return Promise.reject(new Error("Missing Readable Stream or Buffer"));
+      const Key = getFileKey(file);
       return new Promise((resolve, reject) => {
         cos.putObject(
           {
@@ -138,14 +171,18 @@ export = {
             Body: file.stream || file.buffer,
           },
           function (err, data) {
-            log({err, data, size: file.size})
-            if (err) return reject(err)
-            file.url = `https://${data.Location}`
-            file.provider = 'strapi-provider-upload-tencent-cloud-storage'
-            resolve()
-          }
-        )
-      })
+            log({ err, data, size: file.size });
+            if (err) return reject(err);
+            if (CDNDomain) {
+              file.url = `${CDNDomain}/${Key}`;
+            } else {
+              file.url = `https://${data.Location}`;
+            }
+            file.provider = "strapi-provider-upload-tencent-cloud-storage";
+            resolve();
+          },
+        );
+      });
     }
-  }
+  },
 };

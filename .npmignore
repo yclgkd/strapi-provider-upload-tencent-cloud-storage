@@ -6,3 +6,4 @@ lib
 pnpm-lock.yaml
 tsconfig.json
 .npmignore
+.husky
