@@ -50,10 +50,10 @@ module.exports = ({ env }) => ({
     config: {
       provider: "strapi-provider-upload-tencent-cloud-storage",
       providerOptions: {
-        SecretId: env("COS_SecretId"),
-        SecretKey: env("COS_SecretKey"),
-        Region: env("COS_Region"),
-        Bucket: env("COS_Bucket"),
+        SecretId: env("COS_SECRET_ID"),
+        SecretKey: env("COS_SECRET_KEY"),
+        Region: env("COS_REGION"),
+        Bucket: env("COS_BUCKET"),
       },
     },
   },
@@ -78,10 +78,10 @@ module.exports = ({ env }) => ({
     config: {
       provider: "strapi-provider-upload-tencent-cloud-storage",
       providerOptions: {
-        SecretId: env("COS_SecretId"),
-        SecretKey: env("COS_SecretKey"),
-        Region: env("COS_Region"),
-        Bucket: env("COS_Bucket"),
+        SecretId: env("COS_SECRET_ID"),
+        SecretKey: env("COS_SECRET_KEY"),
+        Region: env("COS_REGION"),
+        Bucket: env("COS_BUCKET"),
         ACL: "private", // <= set ACL to private
       },
     },
@@ -141,10 +141,10 @@ module.exports = ({ env }) => ({
       provider: "strapi-provider-upload-tencent-cloud-storage",
       providerOptions: {
         CDNDomain: "example-cdn-domain.com", // <= CDN Accelerated Domain
-        SecretId: env("COS_SecretId"),
-        SecretKey: env("COS_SecretKey"),
-        Region: env("COS_Region"),
-        Bucket: env("COS_Bucket"),
+        SecretId: env("COS_SECRET_ID"),
+        SecretKey: env("COS_SECRET_KEY"),
+        Region: env("COS_REGION"),
+        Bucket: env("COS_BUCKET"),
       },
     },
   },
