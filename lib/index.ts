@@ -30,7 +30,7 @@ interface ConfigOptions {
   initOptions?: COSOptions;
   Bucket: string;
   Region: string;
-  uploadOptions?: Exclude<
+  uploadOptions?: Omit<
     PutObjectParams,
     "Bucket" | "Region" | "Key" | "Body" | "ContentLength" | "ContentType"
   >;
@@ -45,7 +45,7 @@ interface ConfigOptions {
 const { PayloadTooLargeError } = utils.errors;
 const { kbytesToBytes, bytesToHumanReadable } = utils.file;
 
-const log = (...args: any) => {
+const log = (...args: unknown[]) => {
   if (process.env.NODE_ENV !== "production") {
     console.debug(">>>>>>> upload cos <<<<<<<");
     console.debug(...args);
@@ -146,7 +146,10 @@ export = {
               Protocol: "https",
             },
             function (err, data) {
-              log({ err, data });
+              // Do not log `data` here: data.Url contains the signed
+              // signature, which would leak shareable credentials into
+              // any environment where debug logs are visible.
+              log({ err, Key });
               if (err) return reject(err);
               resolve({ url: data.Url });
             },
@@ -181,6 +184,9 @@ export = {
           function (err, data) {
             log({ err, data, size: file.size });
             if (err) return reject(err);
+            // Strapi's upload provider contract requires us to mutate
+            // the passed-in file object: the caller reads file.url and
+            // file.provider after the promise resolves.
             if (normalizedCDNDomain) {
               file.url = `${normalizedCDNDomain}/${Key}`;
             } else {
