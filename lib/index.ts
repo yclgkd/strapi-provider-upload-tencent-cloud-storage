@@ -146,7 +146,10 @@ export = {
               Protocol: "https",
             },
             function (err, data) {
-              log({ err, data });
+              // Do not log `data` here: data.Url contains the signed
+              // signature, which would leak shareable credentials into
+              // any environment where debug logs are visible.
+              log({ err, Key });
               if (err) return reject(err);
               resolve({ url: data.Url });
             },
