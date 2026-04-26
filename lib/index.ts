@@ -184,6 +184,9 @@ export = {
           function (err, data) {
             log({ err, data, size: file.size });
             if (err) return reject(err);
+            // Strapi's upload provider contract requires us to mutate
+            // the passed-in file object: the caller reads file.url and
+            // file.provider after the promise resolves.
             if (normalizedCDNDomain) {
               file.url = `${normalizedCDNDomain}/${Key}`;
             } else {
