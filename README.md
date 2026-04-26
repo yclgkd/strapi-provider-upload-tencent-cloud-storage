@@ -26,16 +26,15 @@ npm install strapi-provider-upload-tencent-cloud-storage --save
 - `provider` defines the name of the provider
 - `providerOptions` is passed down during the construction of the provider. It contains the following properties:
 
-  - SecretId: Tencent Cloud API SecretId
-  - SecretKey: Tencent Cloud API SecretKey
-  - Region: Tencent Cloud API Region
-  - Bucket: Tencent Cloud API Bucket
-  - ACL: (optional) ACL applied to the uploaded files.
-  - Expires: (optional) Expiration time of the signed URL. Default value is 360 seconds (6 minutes).
-  - initOptions: (optional) Options passed to the constructor of the provider. You can find the complete list of [options here](https://cloud.tencent.com/document/product/436/8629#:~:text=%E5%8F%82%E8%A7%81%20demo%20%E7%A4%BA%E4%BE%8B%E3%80%82-,%E9%85%8D%E7%BD%AE%E9%A1%B9,-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E5%8F%82%E6%95%B0).
-  - uploadOptions: (optional) Options passed to the `upload` method. You can find the complete list of [options here](https://cloud.tencent.com/document/product/436/64980#.E7.AE.80.E5.8D.95.E4.B8.8A.E4.BC.A0.E5.AF.B9.E8.B1.A1).
-  - CDNDomain: (optional) CDN Accelerated Domain.
-  - StorageRootPath: (optional) The storage path of the file in the bucket.
+  - `SecretId` / `SecretKey`: Tencent Cloud API credentials. Required unless you provide `initOptions.getAuthorization` (see [Temporary credentials](#temporary-credentials-getauthorization) below).
+  - `Region`: Tencent Cloud COS region (e.g. `ap-shanghai`).
+  - `Bucket`: Tencent Cloud COS bucket name (e.g. `mybucket-1250000000`).
+  - `ACL`: (optional) `"private"` to keep the bucket private and serve files via signed URLs, or `"default"` (default) to use the bucket's own ACL.
+  - `Expires`: (optional) Expiration time of generated signed URLs, in **seconds**. Default `360` (6 minutes).
+  - `initOptions`: (optional) Forwarded to the COS SDK constructor. See the full list of [COS init options](https://cloud.tencent.com/document/product/436/8629). Use this to configure `getAuthorization`, custom `Domain`, etc.
+  - `uploadOptions`: (optional) Forwarded to `cos.putObject`. See the full list of [putObject options](https://cloud.tencent.com/document/product/436/64980). `Bucket`, `Region`, `Key`, `Body`, `ContentLength` and `ContentType` are managed by the provider and cannot be overridden.
+  - `CDNDomain`: (optional) CDN domain used to compose the public file URL. Both `cdn.example.com` and `https://cdn.example.com` are accepted; `https://` is added if no scheme is present, and trailing slashes are stripped.
+  - `StorageRootPath`: (optional) Prefix inside the bucket. Trailing slashes are stripped automatically.
 
 See the [documentation about using a provider](https://docs.strapi.io/developer-docs/latest/plugins/upload.html#using-a-provider) for information on installing and using a provider. To understand how environment variables are used in Strapi, please refer to the [documentation about environment variables](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/configurations/optional/environment.html#environment-variables).
 
@@ -151,6 +150,39 @@ module.exports = ({ env }) => ({
   // ...
 });
 ```
+
+The CDN domain may be passed with or without a scheme — `cdn.example.com`, `https://cdn.example.com` and `https://cdn.example.com/` all produce the same `https://cdn.example.com/<key>` URL.
+
+### Configure a storage path prefix
+
+Use `StorageRootPath` to scope uploads to a sub-path inside the bucket — useful when several Strapi projects share one bucket.
+
+```js
+providerOptions: {
+  // ...
+  StorageRootPath: "my-strapi-app/uploads",
+},
+```
+
+The provider stores files under `<StorageRootPath>/<file.path>/<hash><ext>`. Trailing slashes on `StorageRootPath` are stripped automatically.
+
+### Temporary credentials (`getAuthorization`)
+
+Instead of static `SecretId` / `SecretKey`, you can let the COS SDK fetch a temporary token via the [`getAuthorization`](https://cloud.tencent.com/document/product/436/12260) callback. Pass the function through `initOptions`:
+
+```js
+providerOptions: {
+  Region: env("COS_REGION"),
+  Bucket: env("COS_BUCKET"),
+  initOptions: {
+    getAuthorization: (options, callback) => {
+      // Call your STS endpoint and invoke callback({ TmpSecretId, TmpSecretKey, SecurityToken, ... })
+    },
+  },
+},
+```
+
+When `getAuthorization` is provided, `SecretId` and `SecretKey` are not required.
 
 ## Contribution
 
