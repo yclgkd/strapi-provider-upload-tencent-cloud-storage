@@ -45,7 +45,7 @@ interface ConfigOptions {
 const { PayloadTooLargeError } = utils.errors;
 const { kbytesToBytes, bytesToHumanReadable } = utils.file;
 
-const log = (...args: any) => {
+const log = (...args: unknown[]) => {
   if (process.env.NODE_ENV !== "production") {
     console.debug(">>>>>>> upload cos <<<<<<<");
     console.debug(...args);
