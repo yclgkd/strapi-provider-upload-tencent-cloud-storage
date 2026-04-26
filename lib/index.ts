@@ -25,8 +25,8 @@ interface File {
 }
 
 interface ConfigOptions {
-  SecretId: string;
-  SecretKey: string;
+  SecretId?: string;
+  SecretKey?: string;
   initOptions?: COSOptions;
   Bucket: string;
   Region: string;
@@ -69,14 +69,15 @@ export = {
       SecretKey,
       ...config.initOptions,
     };
-    if (
-      (COSInitConfig.SecretId && COSInitConfig.SecretKey) ||
-      COSInitConfig.getAuthorization
-    ) {
-    } else
+    const hasStaticCredentials = Boolean(
+      COSInitConfig.SecretId && COSInitConfig.SecretKey,
+    );
+    const hasAuthorizationFn = Boolean(COSInitConfig.getAuthorization);
+    if (!hasStaticCredentials && !hasAuthorizationFn) {
       throw new Error(
         "getAuthorization or SecretId and SecretKey must be provided",
       );
+    }
 
     const filePrefix = StorageRootPath
       ? `${StorageRootPath.replace(/\/+$/, "")}/`
