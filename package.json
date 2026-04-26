@@ -58,7 +58,7 @@
     "@strapi/strapi": ">=4.0.0"
   },
   "engines": {
-    "node": ">=14.19.1",
+    "node": ">=18.0.0",
     "npm": ">=6.0.0"
   },
   "publishConfig": {
