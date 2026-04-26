@@ -1,54 +1,66 @@
 name: Publish to NPM and Create Release
+
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Use Node.js 18.17.0
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
         with:
-          node-version: "18.17.0"
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
           registry-url: https://registry.npmjs.org
 
-      - name: Install pnpm
-        run: curl -f https://get.pnpm.io/v6.js | node - add --global pnpm
-
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck, lint, test
+        run: |
+          pnpm typecheck
+          pnpm lint
+          pnpm test
 
       - name: Build
         run: pnpm build
 
-      - name: Configure Git User
+      - name: Configure git user
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-      - name: Generate Changelog and Bump Version
-        run: npx standard-version
+      - name: Bump version and generate changelog
+        run: pnpm release
 
-      - name: Get version
-        run: echo "VERSION=$(jq -r '.version' package.json)" >> $GITHUB_ENV
+      - name: Read version
+        id: version
+        run: echo "VERSION=$(jq -r '.version' package.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Publish to NPM
+      - name: Push version commit and tag
+        run: git push --follow-tags origin HEAD
+
+      - name: Publish to npm
         run: pnpm publish --access public --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
-      - name: Set Release Description
-        run: echo "RELEASE_BODY=$(sed -n '/^## \[v'${{ env.VERSION }}'\]/,/^## \[v[0-9.]+\]/p' CHANGELOG.md)" >> $GITHUB_ENV
-
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ env.VERSION }}
-          release_name: Release v${{ env.VERSION }}
-          body: ${{ env.RELEASE_BODY }}
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: Release v${{ steps.version.outputs.VERSION }}
+          generate_release_notes: true
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
