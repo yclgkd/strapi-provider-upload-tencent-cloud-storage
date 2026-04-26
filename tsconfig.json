@@ -7,8 +7,8 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "outDir": "./dist",
-    "declaration": true,
+    "declaration": true
   },
-  "lib": ["lib/**/*.ts"],
+  "include": ["lib/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
