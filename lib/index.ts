@@ -36,7 +36,7 @@ interface ConfigOptions {
   >;
   // access control list for the bucket
   ACL?: "private" | "default";
-  // the expiration time of the signature file(millisecond)
+  // the expiration time of the signed URL (in seconds)
   Expires?: number;
   CDNDomain?: string;
   StorageRootPath?: string;
