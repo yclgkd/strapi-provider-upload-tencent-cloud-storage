@@ -30,7 +30,7 @@ interface ConfigOptions {
   initOptions?: COSOptions;
   Bucket: string;
   Region: string;
-  uploadOptions?: Exclude<
+  uploadOptions?: Omit<
     PutObjectParams,
     "Bucket" | "Region" | "Key" | "Body" | "ContentLength" | "ContentType"
   >;
