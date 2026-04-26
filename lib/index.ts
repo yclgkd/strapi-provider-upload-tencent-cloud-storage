@@ -25,8 +25,8 @@ interface File {
 }
 
 interface ConfigOptions {
-  SecretId: string;
-  SecretKey: string;
+  SecretId?: string;
+  SecretKey?: string;
   initOptions?: COSOptions;
   Bucket: string;
   Region: string;
@@ -36,7 +36,7 @@ interface ConfigOptions {
   >;
   // access control list for the bucket
   ACL?: "private" | "default";
-  // the expiration time of the signature file(millisecond)
+  // the expiration time of the signed URL (in seconds)
   Expires?: number;
   CDNDomain?: string;
   StorageRootPath?: string;
@@ -69,18 +69,25 @@ export = {
       SecretKey,
       ...config.initOptions,
     };
-    if (
-      (COSInitConfig.SecretId && COSInitConfig.SecretKey) ||
-      COSInitConfig.getAuthorization
-    ) {
-    } else
+    const hasStaticCredentials = Boolean(
+      COSInitConfig.SecretId && COSInitConfig.SecretKey,
+    );
+    const hasAuthorizationFn = Boolean(COSInitConfig.getAuthorization);
+    if (!hasStaticCredentials && !hasAuthorizationFn) {
       throw new Error(
         "getAuthorization or SecretId and SecretKey must be provided",
       );
+    }
 
     const filePrefix = StorageRootPath
       ? `${StorageRootPath.replace(/\/+$/, "")}/`
       : "";
+    const normalizedCDNDomain = CDNDomain
+      ? (/^https?:\/\//i.test(CDNDomain)
+          ? CDNDomain
+          : `https://${CDNDomain}`
+        ).replace(/\/+$/, "")
+      : undefined;
     // init COS
     const cos = new COS(COSInitConfig);
 
@@ -154,7 +161,8 @@ export = {
 
     function getFileKey(file: File): string {
       const path = file.path ? `${file.path}/` : "";
-      return `${filePrefix}${path}${file.hash}${file.ext}`;
+      const ext = file.ext ?? "";
+      return `${filePrefix}${path}${file.hash}${ext}`;
     }
 
     function upload(file: File): Promise<void> {
@@ -173,8 +181,8 @@ export = {
           function (err, data) {
             log({ err, data, size: file.size });
             if (err) return reject(err);
-            if (CDNDomain) {
-              file.url = `${CDNDomain}/${Key}`;
+            if (normalizedCDNDomain) {
+              file.url = `${normalizedCDNDomain}/${Key}`;
             } else {
               file.url = `https://${data.Location}`;
             }
