@@ -155,7 +155,8 @@ export = {
 
     function getFileKey(file: File): string {
       const path = file.path ? `${file.path}/` : "";
-      return `${filePrefix}${path}${file.hash}${file.ext}`;
+      const ext = file.ext ?? "";
+      return `${filePrefix}${path}${file.hash}${ext}`;
     }
 
     function upload(file: File): Promise<void> {
