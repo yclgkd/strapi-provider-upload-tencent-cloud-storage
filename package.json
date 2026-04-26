@@ -13,6 +13,7 @@
   "scripts": {
     "cz": "cz",
     "format": "prettier --write --ignore-unknown",
+    "lint": "eslint .",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -46,14 +47,17 @@
   "devDependencies": {
     "@commitlint/cli": "^17.7.0",
     "@commitlint/config-conventional": "^17.7.0",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^20.5.0",
     "@vitest/coverage-v8": "^3.2.4",
     "commitizen": "^4.3.0",
     "cz-conventional-changelog": "^3.3.0",
+    "eslint": "^10.2.1",
     "husky": "^8.0.3",
     "lint-staged": "^14.0.0",
     "prettier": "3.0.2",
     "typescript": "^5.1.6",
+    "typescript-eslint": "^8.59.0",
     "vitest": "^3.2.4"
   },
   "dependencies": {
