@@ -82,6 +82,12 @@ export = {
     const filePrefix = StorageRootPath
       ? `${StorageRootPath.replace(/\/+$/, "")}/`
       : "";
+    const normalizedCDNDomain = CDNDomain
+      ? (/^https?:\/\//i.test(CDNDomain)
+          ? CDNDomain
+          : `https://${CDNDomain}`
+        ).replace(/\/+$/, "")
+      : undefined;
     // init COS
     const cos = new COS(COSInitConfig);
 
@@ -175,8 +181,8 @@ export = {
           function (err, data) {
             log({ err, data, size: file.size });
             if (err) return reject(err);
-            if (CDNDomain) {
-              file.url = `${CDNDomain}/${Key}`;
+            if (normalizedCDNDomain) {
+              file.url = `${normalizedCDNDomain}/${Key}`;
             } else {
               file.url = `https://${data.Location}`;
             }
