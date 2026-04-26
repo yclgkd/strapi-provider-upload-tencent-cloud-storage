@@ -19,6 +19,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "release": "standard-version",
     "prepare": "husky install",
     "preinstall": "npx only-allow pnpm -y"
   },
@@ -56,6 +57,7 @@
     "husky": "^8.0.3",
     "lint-staged": "^14.0.0",
     "prettier": "3.0.2",
+    "standard-version": "^9.5.0",
     "typescript": "^5.1.6",
     "typescript-eslint": "^8.59.0",
     "vitest": "^3.2.4"
