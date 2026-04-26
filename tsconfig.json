@@ -7,8 +7,9 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "outDir": "./dist",
-    "declaration": true
+    "declaration": true,
+    "types": ["node", "vitest/globals"]
   },
-  "include": ["lib/**/*.ts"],
+  "include": ["lib/**/*.ts", "tests/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
