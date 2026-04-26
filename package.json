@@ -4,6 +4,9 @@
   "description": "A integration of Tencent Cloud COS as a file storage solution within Strapi.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "directories": {
     "lib": "./lib"
   },
