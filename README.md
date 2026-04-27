@@ -32,7 +32,7 @@ npm install strapi-provider-upload-tencent-cloud-storage --save
   - `ACL`: (optional) `"private"` to keep the bucket private and serve files via signed URLs, or `"default"` (default) to use the bucket's own ACL.
   - `Expires`: (optional) Expiration time of generated signed URLs, in **seconds**. Default `360` (6 minutes).
   - `initOptions`: (optional) Forwarded to the COS SDK constructor. See the full list of [COS init options](https://cloud.tencent.com/document/product/436/8629). Use this to configure `getAuthorization`, custom `Domain`, etc.
-  - `uploadOptions`: (optional) Forwarded to `cos.putObject`. See the full list of [putObject options](https://cloud.tencent.com/document/product/436/64980). `Bucket`, `Region`, `Key`, `Body`, `ContentLength` and `ContentType` are managed by the provider and cannot be overridden.
+  - `uploadOptions`: (optional) Forwarded to `cos.putObject`. See the full list of [putObject options](https://cloud.tencent.com/document/product/436/64980). `Bucket`, `Region`, `Key`, `Body` and `ContentType` are managed by the provider and cannot be overridden.
   - `CDNDomain`: (optional) CDN domain used to compose the public file URL. Both `cdn.example.com` and `https://cdn.example.com` are accepted; `https://` is added if no scheme is present, and trailing slashes are stripped.
   - `StorageRootPath`: (optional) Prefix inside the bucket. Trailing slashes are stripped automatically.
 
@@ -62,9 +62,9 @@ module.exports = ({ env }) => ({
 
 ### Configuration for a private COS bucket and signed URLs
 
-If your bucket is configured to be private, you will need to set the `ACL` option to `private` in the `params` object. This will ensure file URLs are signed.
+If your bucket is configured to be private, you will need to set the `ACL` option to `private` in `providerOptions`. This will ensure file URLs are signed.
 
-**Note:** If you are using a CDN, the URLs will not be signed.
+**Note:** When `ACL` is `"private"`, signed URLs are generated against the COS bucket domain — `CDNDomain` is not used for signing (CDN authentication is a separate Tencent Cloud mechanism). Configuring both `ACL: "private"` and `CDNDomain` is not recommended.
 
 You can also define the expiration time of the signed URL by setting the `Expires` option in the `providerOptions` object. The default value is 360 seconds (6 minutes).
 

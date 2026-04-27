@@ -190,6 +190,57 @@ describe("upload: file.url composition (CDN normalization)", () => {
   });
 });
 
+describe("upload: ContentType", () => {
+  it("passes file.mime as ContentType to putObject", async () => {
+    const p = provider.init(baseConfig);
+    putObject.mockImplementation((_params, cb) =>
+      cb(null, { Location: "loc" }),
+    );
+    await p.upload(baseFile({ mime: "image/webp" }) as never);
+    expect(putObject.mock.calls[0][0].ContentType).toBe("image/webp");
+  });
+
+  it("does not let uploadOptions override ContentType", async () => {
+    const p = provider.init({
+      ...baseConfig,
+      // Cast: ConfigOptions.uploadOptions Omits ContentType, but a JS
+      // consumer could still try to pass it — assert it's ignored.
+      uploadOptions: {
+        ContentType: "application/octet-stream",
+      } as never,
+    });
+    putObject.mockImplementation((_params, cb) =>
+      cb(null, { Location: "loc" }),
+    );
+    await p.upload(baseFile({ mime: "image/png" }) as never);
+    expect(putObject.mock.calls[0][0].ContentType).toBe("image/png");
+  });
+
+  it("does not set ContentLength (file.size is rounded KB; left to the SDK)", async () => {
+    // Strapi's file.size is rounded to 2 decimal KB and would yield a
+    // non-integer byte count via kbytesToBytes. Letting the SDK measure
+    // the body itself avoids declaring a wrong Content-Length header.
+    const p = provider.init(baseConfig);
+    putObject.mockImplementation((_params, cb) =>
+      cb(null, { Location: "loc" }),
+    );
+    await p.upload(baseFile({ size: 0.98 }) as never);
+    expect(putObject.mock.calls[0][0].ContentLength).toBeUndefined();
+  });
+});
+
+describe("uploadStream", () => {
+  it("is exposed and aliases upload", async () => {
+    const p = provider.init(baseConfig);
+    expect(
+      typeof (p as unknown as { uploadStream?: unknown }).uploadStream,
+    ).toBe("function");
+    expect((p as unknown as { uploadStream: unknown }).uploadStream).toBe(
+      p.upload,
+    );
+  });
+});
+
 describe("upload: input validation", () => {
   it("rejects when neither stream nor buffer is provided", async () => {
     const p = provider.init(baseConfig);

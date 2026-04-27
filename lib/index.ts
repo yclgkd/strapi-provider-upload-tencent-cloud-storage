@@ -32,7 +32,7 @@ interface ConfigOptions {
   Region: string;
   uploadOptions?: Omit<
     PutObjectParams,
-    "Bucket" | "Region" | "Key" | "Body" | "ContentLength" | "ContentType"
+    "Bucket" | "Region" | "Key" | "Body" | "ContentType"
   >;
   // access control list for the bucket
   ACL?: "private" | "default";
@@ -94,7 +94,7 @@ export = {
     return {
       upload,
 
-      // uploadStream: upload,
+      uploadStream: upload,
 
       delete(file: File): Promise<void> {
         const Key = getFileKey(file);
@@ -180,6 +180,7 @@ export = {
             Region,
             Key,
             Body: file.stream || file.buffer,
+            ContentType: file.mime,
           },
           function (err, data) {
             log({ err, data, size: file.size });
