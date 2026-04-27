@@ -62,7 +62,7 @@ module.exports = ({ env }) => ({
 
 ### Configuration for a private COS bucket and signed URLs
 
-If your bucket is configured to be private, you will need to set the `ACL` option to `private` in the `params` object. This will ensure file URLs are signed.
+If your bucket is configured to be private, you will need to set the `ACL` option to `private` in `providerOptions`. This will ensure file URLs are signed.
 
 **Note:** When `ACL` is `"private"`, signed URLs are generated against the COS bucket domain — `CDNDomain` is not used for signing (CDN authentication is a separate Tencent Cloud mechanism). Configuring both `ACL: "private"` and `CDNDomain` is not recommended.
 
