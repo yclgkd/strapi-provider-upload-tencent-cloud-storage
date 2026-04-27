@@ -64,7 +64,7 @@ module.exports = ({ env }) => ({
 
 If your bucket is configured to be private, you will need to set the `ACL` option to `private` in the `params` object. This will ensure file URLs are signed.
 
-**Note:** If you are using a CDN, the URLs will not be signed.
+**Note:** When `ACL` is `"private"`, signed URLs are generated against the COS bucket domain — `CDNDomain` is not used for signing (CDN authentication is a separate Tencent Cloud mechanism). Configuring both `ACL: "private"` and `CDNDomain` is not recommended.
 
 You can also define the expiration time of the signed URL by setting the `Expires` option in the `providerOptions` object. The default value is 360 seconds (6 minutes).
 
