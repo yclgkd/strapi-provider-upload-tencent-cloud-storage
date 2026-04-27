@@ -190,6 +190,57 @@ describe("upload: file.url composition (CDN normalization)", () => {
   });
 });
 
+describe("upload: ContentType and ContentLength", () => {
+  it("passes file.mime as ContentType to putObject", async () => {
+    const p = provider.init(baseConfig);
+    putObject.mockImplementation((_params, cb) =>
+      cb(null, { Location: "loc" }),
+    );
+    await p.upload(baseFile({ mime: "image/webp" }) as never);
+    expect(putObject.mock.calls[0][0].ContentType).toBe("image/webp");
+  });
+
+  it("passes ContentLength in bytes (file.size is in KB)", async () => {
+    const p = provider.init(baseConfig);
+    putObject.mockImplementation((_params, cb) =>
+      cb(null, { Location: "loc" }),
+    );
+    await p.upload(baseFile({ size: 100 }) as never);
+    // 100 KB -> 102400 bytes (per kbytesToBytes mock)
+    expect(putObject.mock.calls[0][0].ContentLength).toBe(100 * 1024);
+  });
+
+  it("does not let uploadOptions override ContentType / ContentLength", async () => {
+    const p = provider.init({
+      ...baseConfig,
+      // Cast: ConfigOptions.uploadOptions Omits these keys, but a JS
+      // consumer could still try to pass them — assert they're ignored.
+      uploadOptions: {
+        ContentType: "application/octet-stream",
+        ContentLength: 1,
+      } as never,
+    });
+    putObject.mockImplementation((_params, cb) =>
+      cb(null, { Location: "loc" }),
+    );
+    await p.upload(baseFile({ mime: "image/png", size: 50 }) as never);
+    expect(putObject.mock.calls[0][0].ContentType).toBe("image/png");
+    expect(putObject.mock.calls[0][0].ContentLength).toBe(50 * 1024);
+  });
+});
+
+describe("uploadStream", () => {
+  it("is exposed and aliases upload", async () => {
+    const p = provider.init(baseConfig);
+    expect(
+      typeof (p as unknown as { uploadStream?: unknown }).uploadStream,
+    ).toBe("function");
+    expect((p as unknown as { uploadStream: unknown }).uploadStream).toBe(
+      p.upload,
+    );
+  });
+});
+
 describe("upload: input validation", () => {
   it("rejects when neither stream nor buffer is provided", async () => {
     const p = provider.init(baseConfig);

@@ -94,7 +94,7 @@ export = {
     return {
       upload,
 
-      // uploadStream: upload,
+      uploadStream: upload,
 
       delete(file: File): Promise<void> {
         const Key = getFileKey(file);
@@ -180,6 +180,11 @@ export = {
             Region,
             Key,
             Body: file.stream || file.buffer,
+            ContentType: file.mime,
+            // file.size is in KB; ContentLength must be bytes. Passing it
+            // explicitly avoids the SDK buffering the whole stream just to
+            // measure its length.
+            ContentLength: kbytesToBytes(file.size),
           },
           function (err, data) {
             log({ err, data, size: file.size });
