@@ -190,7 +190,7 @@ describe("upload: file.url composition (CDN normalization)", () => {
   });
 });
 
-describe("upload: ContentType and ContentLength", () => {
+describe("upload: ContentType", () => {
   it("passes file.mime as ContentType to putObject", async () => {
     const p = provider.init(baseConfig);
     putObject.mockImplementation((_params, cb) =>
@@ -200,32 +200,32 @@ describe("upload: ContentType and ContentLength", () => {
     expect(putObject.mock.calls[0][0].ContentType).toBe("image/webp");
   });
 
-  it("passes ContentLength in bytes (file.size is in KB)", async () => {
-    const p = provider.init(baseConfig);
-    putObject.mockImplementation((_params, cb) =>
-      cb(null, { Location: "loc" }),
-    );
-    await p.upload(baseFile({ size: 100 }) as never);
-    // 100 KB -> 102400 bytes (per kbytesToBytes mock)
-    expect(putObject.mock.calls[0][0].ContentLength).toBe(100 * 1024);
-  });
-
-  it("does not let uploadOptions override ContentType / ContentLength", async () => {
+  it("does not let uploadOptions override ContentType", async () => {
     const p = provider.init({
       ...baseConfig,
-      // Cast: ConfigOptions.uploadOptions Omits these keys, but a JS
-      // consumer could still try to pass them — assert they're ignored.
+      // Cast: ConfigOptions.uploadOptions Omits ContentType, but a JS
+      // consumer could still try to pass it — assert it's ignored.
       uploadOptions: {
         ContentType: "application/octet-stream",
-        ContentLength: 1,
       } as never,
     });
     putObject.mockImplementation((_params, cb) =>
       cb(null, { Location: "loc" }),
     );
-    await p.upload(baseFile({ mime: "image/png", size: 50 }) as never);
+    await p.upload(baseFile({ mime: "image/png" }) as never);
     expect(putObject.mock.calls[0][0].ContentType).toBe("image/png");
-    expect(putObject.mock.calls[0][0].ContentLength).toBe(50 * 1024);
+  });
+
+  it("does not set ContentLength (file.size is rounded KB; left to the SDK)", async () => {
+    // Strapi's file.size is rounded to 2 decimal KB and would yield a
+    // non-integer byte count via kbytesToBytes. Letting the SDK measure
+    // the body itself avoids declaring a wrong Content-Length header.
+    const p = provider.init(baseConfig);
+    putObject.mockImplementation((_params, cb) =>
+      cb(null, { Location: "loc" }),
+    );
+    await p.upload(baseFile({ size: 0.98 }) as never);
+    expect(putObject.mock.calls[0][0].ContentLength).toBeUndefined();
   });
 });
 

@@ -32,7 +32,7 @@ interface ConfigOptions {
   Region: string;
   uploadOptions?: Omit<
     PutObjectParams,
-    "Bucket" | "Region" | "Key" | "Body" | "ContentLength" | "ContentType"
+    "Bucket" | "Region" | "Key" | "Body" | "ContentType"
   >;
   // access control list for the bucket
   ACL?: "private" | "default";
@@ -181,10 +181,6 @@ export = {
             Key,
             Body: file.stream || file.buffer,
             ContentType: file.mime,
-            // file.size is in KB; ContentLength must be bytes. Passing it
-            // explicitly avoids the SDK buffering the whole stream just to
-            // measure its length.
-            ContentLength: kbytesToBytes(file.size),
           },
           function (err, data) {
             log({ err, data, size: file.size });

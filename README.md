@@ -32,7 +32,7 @@ npm install strapi-provider-upload-tencent-cloud-storage --save
   - `ACL`: (optional) `"private"` to keep the bucket private and serve files via signed URLs, or `"default"` (default) to use the bucket's own ACL.
   - `Expires`: (optional) Expiration time of generated signed URLs, in **seconds**. Default `360` (6 minutes).
   - `initOptions`: (optional) Forwarded to the COS SDK constructor. See the full list of [COS init options](https://cloud.tencent.com/document/product/436/8629). Use this to configure `getAuthorization`, custom `Domain`, etc.
-  - `uploadOptions`: (optional) Forwarded to `cos.putObject`. See the full list of [putObject options](https://cloud.tencent.com/document/product/436/64980). `Bucket`, `Region`, `Key`, `Body`, `ContentLength` and `ContentType` are managed by the provider and cannot be overridden.
+  - `uploadOptions`: (optional) Forwarded to `cos.putObject`. See the full list of [putObject options](https://cloud.tencent.com/document/product/436/64980). `Bucket`, `Region`, `Key`, `Body` and `ContentType` are managed by the provider and cannot be overridden.
   - `CDNDomain`: (optional) CDN domain used to compose the public file URL. Both `cdn.example.com` and `https://cdn.example.com` are accepted; `https://` is added if no scheme is present, and trailing slashes are stripped.
   - `StorageRootPath`: (optional) Prefix inside the bucket. Trailing slashes are stripped automatically.
 
