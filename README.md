@@ -1,5 +1,7 @@
 # strapi-provider-upload-tencent-cloud-storage
 
+Compatible with Strapi v4 and v5.
+
 ## Resources
 
 - [LICENSE](LICENSE)
