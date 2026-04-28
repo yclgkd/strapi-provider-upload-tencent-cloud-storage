@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/yclgkd/strapi-provider-upload-tencent-cloud-storage/compare/v1.2.0...v1.3.0) (2026-04-28)
+
+
+### Features
+
+* add Strapi v5 compatibility ([#14](https://github.com/yclgkd/strapi-provider-upload-tencent-cloud-storage/issues/14)) ([9f6b1f6](https://github.com/yclgkd/strapi-provider-upload-tencent-cloud-storage/commit/9f6b1f60633c3110054659f5773625b143f99f4c))
+
+
+### Bug Fixes
+
+* publish with trusted npm OIDC ([cfa2a61](https://github.com/yclgkd/strapi-provider-upload-tencent-cloud-storage/commit/cfa2a6122486e825f3c7fcf7c44092d4054528f8))
+
 ## [1.2.0](https://github.com/yclgkd/strapi-provider-upload-tencent-cloud-storage/compare/v1.1.5...v1.2.0) (2026-04-27)
 
 
